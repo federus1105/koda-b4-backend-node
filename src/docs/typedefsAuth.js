@@ -1,3 +1,4 @@
+// === REGISTER ===
 /**
  * Register body schema
  * @typedef {object} Register
@@ -25,4 +26,20 @@
 /**
  * @typedef {object} AccountResponse
  * @property {string} fullname
+ */
+
+
+// === LOGIN ===
+/**
+ * @typedef  {object} Login
+ * @property {string} email.required - Email
+ * @property {string} password.required - Password
+ */
+
+/**
+ * @typedef  {object} LoginResponse
+ * @property {boolean} success
+ * @property {string} message
+ * @property {object} results
+ * @property {string} results.token
  */

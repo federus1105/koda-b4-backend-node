@@ -45,6 +45,15 @@ export async function Register(req, res) {
  }
 }
 
+
+/**
+ * POST /auth/login
+ * @summary Login
+ * @tags Auth
+ * @param {Login} request.body.required
+ * @return {LoginResponse} 200 - Successful login
+ * @return {object} 401 - Invalid email or password
+ */
 export async function Login(req, res) {
   const { email, password } = req.body;
   try {
