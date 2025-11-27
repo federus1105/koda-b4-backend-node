@@ -1,5 +1,6 @@
 import { getPrisma } from '../pkg/libs/prisma.js';
-import {RegisterUser} from '../models/auth.models.js'
+import {LoginUser, RegisterUser} from '../models/auth.models.js'
+import jwt from 'jsonwebtoken';
 const prisma = getPrisma();
 
 
@@ -40,6 +41,27 @@ export async function Register(req, res) {
      success: false,
      message: 'Internal server error',
      error: error.message
-        });
+    });
  }
+}
+
+export async function Login(req, res) {
+  const { email, password } = req.body;
+  try {
+      const user = await LoginUser(email, password);
+        const token = jwt.sign({id: user.id, role: user.role}, process.env.JWT_SECRET, {
+            expiresIn: '15h',
+        })
+        res.status(200).json({
+            success: true,
+            message: 'Login successfully',
+            results: {token}
+        });
+
+    } catch (error) {
+        res.status(401).json({
+            success: false,
+            error: error.message
+        });
+    }
 }
