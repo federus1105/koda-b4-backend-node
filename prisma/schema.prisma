@@ -5,10 +5,258 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
+}
+
+// --- ENUM --
+enum Role {
+  admin
+  user
+}
+
+enum Size {
+  regular
+  medium
+  large
+}
+
+enum Variant {
+  ice
+  hot
+}
+
+// --- AUTH ----
+model Users {
+  id       Int    @id @default(autoincrement())
+  email    String
+  password String
+  role     Role   @default(user)
+
+  accounts Account[]
+
+  @@map("users")
+}
+
+model Account {
+  id          Int      @id @default(autoincrement())
+  id_users    Int
+  fullname    String?
+  phoneNumber String?
+  address     String?
+  photos      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  orders Orders[]
+  carts  Cart[]
+  user   Users    @relation(fields: [id_users], references: [id])
+
+  @@map("account")
+}
+
+// --- PAYMENT ----
+model PaymentMethod {
+  id     Int    @id @default(autoincrement())
+  name   String
+  photos String
+
+  orders Orders[]
+
+  @@map("payment_method")
+}
+
+// --- ORDER ---
+model Delivery {
+  id   Int    @id @default(autoincrement())
+  name String
+  fee  Float
+
+  orders Orders[]
+
+  @@map("delivery")
+}
+
+model Status {
+  id   Int    @id @default(autoincrement())
+  name String @default("on progres")
+
+  orders Orders[]
+
+  @@map("status")
+}
+
+model Orders {
+  id               Int      @id @default(autoincrement())
+  id_account       Int
+  id_paymentmethod Int
+  fullname         String
+  address          String
+  phoneNumber      String
+  email            String
+  id_delivery      Int
+  total            Float
+  id_status        Int
+  order_number     String
+  tax              Float
+  delivery_fee     Float
+  subtotal         Float
+  createdAt        DateTime @default(now())
+
+  account       Account         @relation(fields: [id_account], references: [id])
+  paymentMethod PaymentMethod   @relation(fields: [id_paymentmethod], references: [id])
+  delivery      Delivery        @relation(fields: [id_delivery], references: [id])
+  status        Status          @relation(fields: [id_status], references: [id])
+  productOrders ProductOrders[]
+
+  @@map("orders")
+}
+
+// --- CATEGORIES ---
+model Categories {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  products ProductCategories[]
+
+  @@map("categories")
+}
+
+// --- PRODUCT IMAGES ---
+model ProductImages {
+  id          Int     @id @default(autoincrement())
+  photosOne   String?
+  photosTwo   String?
+  photosThree String?
+  photosFour  String?
+
+  product Product[]
+
+  @@map("product_images")
+}
+
+// --- SIZES ---
+model Sizes {
+  id   Int  @id @default(autoincrement())
+  name Size
+
+  sizeProducts SizeProduct[]
+  cartItems    Cart[]
+
+  @@map("sizes")
+}
+
+// --- VARIANTS ---
+model Variants {
+  id   Int     @id @default(autoincrement())
+  name Variant
+
+  variantProducts VariantProduct[]
+  cartItems       Cart[]
+
+  @@map("variants")
+}
+
+// --- PRODUCT ---
+model Product {
+  id                Int      @id @default(autoincrement())
+  name              String
+  id_product_images Int
+  description       String
+  rating            Float
+  priceOriginal     Float
+  priceDiscount     Float    @default(0)
+  flashSale         Boolean  @default(false)
+  stock             Int
+  isDeleted         Boolean  @default(false)
+  isFavorite        Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+
+  productImages     ProductImages       @relation(fields: [id_product_images], references: [id])
+  sizeProducts      SizeProduct[]
+  variantProducts   VariantProduct[]
+  productOrders     ProductOrders[]
+  productCategories ProductCategories[]
+  cartItems         Cart[]
+
+  @@map("products")
+}
+
+// --- VARIANT PRODUCT ---
+model VariantProduct {
+  id_product Int
+  id_variant Int
+
+  product Product  @relation(fields: [id_product], references: [id])
+  variant Variants @relation(fields: [id_variant], references: [id])
+
+  @@id([id_product, id_variant])
+  @@map("variant_product")
+}
+
+// --- SIZE PRODUCT ---
+model SizeProduct {
+  id_product Int
+  id_size    Int
+
+  product Product @relation(fields: [id_product], references: [id])
+  size    Sizes   @relation(fields: [id_size], references: [id])
+
+  @@id([id_product, id_size])
+  @@map("size_product")
+}
+
+// --- PRODUCT ORDERS ---
+model ProductOrders {
+  id_product Int
+  id_order   Int
+  quantity   Int
+  subtotal   Float
+  size       String?
+  variant    String?
+
+  product Product @relation(fields: [id_product], references: [id])
+  order   Orders  @relation(fields: [id_order], references: [id])
+
+  @@id([id_product, id_order])
+  @@map("product_orders")
+}
+
+// --- PRODUCT_CATEGORIES ---
+model ProductCategories {
+  id_product    Int
+  id_categories Int
+
+  product  Product    @relation(fields: [id_product], references: [id])
+  category Categories @relation(fields: [id_categories], references: [id])
+
+  @@id([id_product, id_categories])
+  @@map("product_categories")
+}
+
+// --- CART ---
+model Cart {
+  id         Int      @id @default(autoincrement())
+  account_id Int
+  product_id Int
+  size_id    Int?
+  variant_id Int?
+  quantity   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+
+  account Account   @relation(fields: [account_id], references: [id])
+  product Product   @relation(fields: [product_id], references: [id])
+  size    Sizes?    @relation(fields: [size_id], references: [id])
+  variant Variants? @relation(fields: [variant_id], references: [id])
+
+  @@unique([account_id, product_id, size_id, variant_id])
+  @@map("cart")
 }
