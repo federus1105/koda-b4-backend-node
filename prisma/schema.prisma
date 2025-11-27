@@ -167,7 +167,7 @@ model Variants {
 model Product {
   id                Int      @id @default(autoincrement())
   name              String
-  id_product_images Int
+  id_product_images Int?
   description       String
   rating            Float
   priceOriginal     Float
@@ -179,7 +179,7 @@ model Product {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @default(now())
 
-  productImages     ProductImages       @relation(fields: [id_product_images], references: [id])
+  productImages     ProductImages?       @relation(fields: [id_product_images], references: [id])
   sizeProducts      SizeProduct[]
   variantProducts   VariantProduct[]
   productOrders     ProductOrders[]
