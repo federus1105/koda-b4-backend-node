@@ -1,12 +1,7 @@
 import { getPrisma } from '../pkg/libs/prisma.js';
-import { hashPassword } from '../pkg/libs/hashPassword.js';
+import { hashPassword, verifyPassword } from '../pkg/libs/hashPassword.js';
 const prisma = getPrisma();
 
-export async function findUserByEmail(email) {
-  return prisma.users.findUnique({
-    where: { email },
-  });
-}
 
 export async function RegisterUser(email, password, fullname ) {
 const hashedPassword = await hashPassword(password)
@@ -38,4 +33,31 @@ const hashedPassword = await hashPassword(password)
 
     return { user, account };
   });
+}
+
+export async function LoginUser(email, password) {
+  const user = await prisma.users.findFirst({
+    where: {email},
+    include: {
+      accounts: true
+    }
+  })
+
+  if (!user) {
+    throw new Error("Invalid email or password");
+  }
+  
+  // --- VERIFY PASSWORD ---
+  const isValid = await verifyPassword(user.password, password);
+  if (!isValid) {
+      throw new Error("Invalid email or password");
+  }
+
+  return {
+      id: user.id,
+      email: user.email,
+      fullname: user.account?.fullname || null,
+      role: user.role
+  };
+
 }
