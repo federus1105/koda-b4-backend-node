@@ -1,4 +1,4 @@
-import { CreateProduct, getAllProducts } from "../models/product.admin.models.js";
+import { CreateProduct, getAllProducts, updateProduct } from "../models/product.admin.models.js";
 import { normalizeInput } from "../pkg/utils/common.js";
 import { getPrisma } from '../pkg/libs/prisma.js';
 import path from 'path'
@@ -117,6 +117,83 @@ export async function CreateProductHandler(req, res) {
     res.status(500).json({
       success: false,
       message: "Internal server error",
+      error: error.message,
+    });
+  }
+}
+
+
+export async function updateProductHandler(req, res) {
+  try {
+    // File upload → ambil nama file saja
+    const image = {
+      imageId: req.body.imageId, // kalau mau ganti image, bisa ambil id dari body
+      image_oneStr: req.files.image_one?.[0]?.filename,
+      image_twoStr: req.files.image_two?.[0]?.filename,
+      image_threeStr: req.files.image_three?.[0]?.filename,
+      image_fourStr: req.files.image_four?.[0]?.filename,
+    };
+
+    // Normalisasi array sudah dilakukan di middleware normalizeArrayFields
+    const { size, variant, category } = req.body;
+
+    const product = await updateProduct({
+      id: parseInt(req.params.id),
+      name: req.body.name,
+      description: req.body.description,
+      rating: req.body.rating,
+      priceOriginal: req.body.price,
+      stock: req.body.stock,
+      image,
+      size,
+      variant,
+      category,
+    });
+
+    
+    //  --- GET DATA FOR RESPONSE ---
+    const [images, sizes, variants, categories] = await Promise.all([
+      prisma.productImages.findUnique({
+        where: { id: product.id_product_images },
+      }),
+      prisma.sizeProduct.findMany({
+        where: { id_product: product.id },
+        select: { id_size: true },
+      }),
+      prisma.variantProduct.findMany({
+        where: { id_product: product.id },
+        select: { id_variant: true },
+      }),
+      prisma.productCategories.findMany({
+        where: { id_product: product.id },
+        select: { id_categories: true },
+      }),
+    ]);
+
+    // --- RESPONSE ---
+    const response = {
+      id: product.id,
+      name: product.name,
+      id_image: product.id_product_images,
+      images: images,
+      price: product.priceOriginal,
+      rating: product.rating,
+      description: product.description,
+      stock: product.stock,
+      size: sizes.map(s => s.id_size),
+      variant: variants.map(v => v.id_variant),
+      category: categories.map(c => c.id_categories),
+    };
+
+    res.status(200).json({
+      success: true,
+      message: 'Product updated successfully',
+      results: response,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
       error: error.message,
     });
   }
