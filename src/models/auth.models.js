@@ -1,5 +1,5 @@
-import { getPrisma } from '../libs/prisma.js';
-import bcrypt from "bcryptjs";
+import { getPrisma } from '../pkg/libs/prisma.js';
+import { hashPassword } from '../pkg/libs/hashPassword.js';
 const prisma = getPrisma();
 
 export async function findUserByEmail(email) {
@@ -8,8 +8,8 @@ export async function findUserByEmail(email) {
   });
 }
 
-export async function Register(email, password ) {
-const hashedPassword = await bcrypt.hash(password, 10);
+export async function RegisterUser(email, password, fullname ) {
+const hashedPassword = await hashPassword(password)
 
   const userData = {
     email,
@@ -21,7 +21,7 @@ const hashedPassword = await bcrypt.hash(password, 10);
   };
 
   return prisma.$transaction(async (tx) => {
-    const existingUser = await tx.users.findUnique({
+    const existingUser = await tx.users.findFirst({
       where: { email },
     });
     if (existingUser) {
@@ -29,7 +29,7 @@ const hashedPassword = await bcrypt.hash(password, 10);
     }
 
     // --- CREATE NEW USER ---
-    const user = await tx.user.create({ data: userData });
+    const user = await tx.users.create({ data: userData });
 
     // --- CREATE USER ACCOUNT ---
     const account = await tx.account.create({
