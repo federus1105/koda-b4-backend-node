@@ -1,6 +1,8 @@
-import express from 'express';
-import { Register } from '../handler/auth.handler.js';
+import { Router } from "express";
+import authRoutes from "./auth.routes.js"
 
-const router = express.Router();
+const router = Router();
 
-router.post('/', Register)
+router.use('/auth', authRoutes);
+
+export default router;
