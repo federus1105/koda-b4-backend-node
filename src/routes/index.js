@@ -6,6 +6,6 @@ import {authMiddleware, adminMiddleware } from "../middleware/auth.middleware.js
 const router = Router();
 
 router.use('/auth', authRoutes);
-router.use('/admin/product', authMiddleware,adminMiddleware, productAdminRoutes);
+router.use('/admin/product', authMiddleware, adminMiddleware, productAdminRoutes);
 
 export default router;
