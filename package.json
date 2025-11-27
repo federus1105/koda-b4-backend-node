@@ -1,0 +1,32 @@
+{
+  "name": "koda-b4-backend-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node --watch index.js",
+    "migrate:create": "prisma migrate dev --name",
+    "migrate:run": "prisma migrate dev",
+    "migrate:reset": "prisma migrate reset",
+    "orm:generate": "prisma generate"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.0.1",
+    "@prisma/client": "^7.0.1",
+    "bcrypt": "^6.0.0",
+    "express": "^5.1.0",
+    "express-jsdoc-swagger": "^1.8.0",
+    "express-validator": "^7.3.1",
+    "jsdoc": "^4.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3",
+    "prisma": "^7.0.1"
+  }
+}
