@@ -1,9 +1,8 @@
 import express from 'express';
-import { ListProducts } from '../handlers/product.admin.handler';
-import authMiddleware from '../middleware/auth.middleware';
+import { ListProducts } from '../handlers/product.admin.handler.js';
 
 const router = express.Router();
 
-router.get('/', authMiddleware, ListProducts)
+router.get('/', ListProducts)
 
 export default router
