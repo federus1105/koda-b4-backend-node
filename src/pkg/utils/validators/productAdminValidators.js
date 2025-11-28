@@ -72,34 +72,34 @@ export const AdminCreateProduct = [
 
 export const AdminUpdateProduct = [
 
-  // Name (optional)
+  // Name
   body("name")
     .optional({ nullable: true })
     .isString().withMessage("Name must be a string")
     .isLength({ min: 1 }).withMessage("Name cannot be empty"),
 
-  // Description (optional)
+  // Description
   body("description")
     .optional({ nullable: true })
     .isString().withMessage("Description must be a string")
     .isLength({ min: 1 }).withMessage("Description cannot be empty"),
 
-  // Rating (optional)
+  // Rating
   body("rating")
     .optional({ nullable: true })
     .isFloat({ min: 1, max: 10 }).withMessage("Rating must be between 1–10"),
 
-  // Price (optional)
+  // Price
   body("priceOriginal")
     .optional({ nullable: true })
     .isInt({ min: 5000 }).withMessage("Price must be at least 5000"),
 
-  // Stock (optional)
+  // Stock
   body("stock")
     .optional({ nullable: true })
     .isInt({ min: 0 }).withMessage("Stock cannot be negative"),
 
-  // CATEGORY (optional)
+  // CATEGORY
   body("category")
     .optional({ nullable: true })
     .customSanitizer(normalizeInput)
@@ -113,7 +113,7 @@ export const AdminUpdateProduct = [
       return true;
     }),
 
-  // SIZE (optional)
+  // SIZE
   body("size")
     .optional({ nullable: true })
     .customSanitizer(normalizeInput)
@@ -130,7 +130,7 @@ export const AdminUpdateProduct = [
       return true;
     }),
 
-  // VARIANT (optional)
+  // VARIANT
   body("variant")
     .optional({ nullable: true })
     .customSanitizer(normalizeInput)
