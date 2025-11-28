@@ -2,23 +2,77 @@ import { getPrisma } from '../pkg/libs/prisma.js';
 const prisma = getPrisma();
 import { normalizeInput } from '../pkg/utils/common.js';
 
-export async function getAllProducts(filters) {
-    const products = await prisma.product.findMany({
-        where: filters.name
-            ? {
-                  name: {
-                      contains: filters.name,
-                      mode: "insensitive",
-                  },
-              }
-            : {},
-        orderBy: {
-            createdAt: "desc",
-        },
-    });
+export async function getAllProducts({ name, skip = 0, take = 10, countOnly = false }) {
+  const where = { isDeleted: false };
 
-    return products;
+  if (name) {
+    where.name = {
+      contains: name,
+    };
+  }
+
+  if (countOnly) {
+    return await prisma.product.count({ where });
+  }
+
+  const products = await prisma.product.findMany({
+    where,
+    skip,
+    take,
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      priceOriginal: true,
+      stock: true,
+      rating: true,
+      productImages: {
+        select: {
+          photosOne: true,
+          photosTwo: true,
+          photosThree: true,
+          photosFour: true
+        }
+      },
+      sizeProducts: {
+        select: {
+          size: {
+            select: { name: true }
+          }
+        }
+      },
+      variantProducts: {
+        select: {
+          variant: {
+            select: { name: true }
+          }
+        }
+      }
+    }
+  });
+
+  const result = products.map(p => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    price: p.priceOriginal,
+    stock: p.stock,
+    rating: p.rating,
+     images: {
+      image_one: p.productImages?.photosOne || null,
+      image_two: p.productImages?.photosTwo || null,
+      image_three: p.productImages?.photosThree || null,
+      image_four: p.productImages?.photosFour || null
+    },
+    size: [...new Set(p.sizeProducts.map(sp => sp.size.name))],
+    variant: [...new Set(p.variantProducts.map(vp => vp.variant.name))]
+  }));
+
+  return result;
 }
+
+
 
 export async function CreateProduct({ name, description, rating, priceOriginal, stock, image, size, variant, category }) {
   return prisma.$transaction(async (tx) => {
