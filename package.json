@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "node --watch index.js",
+    "build": "npx prisma generate",
     "migrate:create": "prisma migrate dev --name",
     "migrate:run": "prisma migrate dev",
     "migrate:reset": "prisma migrate reset",
