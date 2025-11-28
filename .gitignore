@@ -4,3 +4,4 @@ generated
 dev.db
 /prisma/migrations
 uploads*
+/generated/prisma
