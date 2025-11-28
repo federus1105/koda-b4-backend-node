@@ -21,17 +21,8 @@ jobs:
       - name: Install Dependencies
         run: npm install   
       
-      - name: Generate Prisma Client
-        run: npx prisma generate
-      
       - name: Install Vercel CLI
         run: npm install -g vercel
-
-      - name: Pull Vercel Project Settings
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Build Project
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build & Deploy Project
         env:
