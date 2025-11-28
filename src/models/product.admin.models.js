@@ -2,23 +2,77 @@ import { getPrisma } from '../pkg/libs/prisma.js';
 const prisma = getPrisma();
 import { normalizeInput } from '../pkg/utils/common.js';
 
-export async function getAllProducts(filters) {
-    const products = await prisma.product.findMany({
-        where: filters.name
-            ? {
-                  name: {
-                      contains: filters.name,
-                      mode: "insensitive",
-                  },
-              }
-            : {},
-        orderBy: {
-            createdAt: "desc",
-        },
-    });
+export async function getAllProducts({ name, skip = 0, take = 10, countOnly = false }) {
+  const where = { isDeleted: false };
 
-    return products;
+  if (name) {
+    where.name = {
+      contains: name,
+    };
+  }
+
+  if (countOnly) {
+    return await prisma.product.count({ where });
+  }
+
+  const products = await prisma.product.findMany({
+    where,
+    skip,
+    take,
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      priceOriginal: true,
+      stock: true,
+      rating: true,
+      productImages: {
+        select: {
+          photosOne: true,
+          photosTwo: true,
+          photosThree: true,
+          photosFour: true
+        }
+      },
+      sizeProducts: {
+        select: {
+          size: {
+            select: { name: true }
+          }
+        }
+      },
+      variantProducts: {
+        select: {
+          variant: {
+            select: { name: true }
+          }
+        }
+      }
+    }
+  });
+
+  const result = products.map(p => ({
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    price: p.priceOriginal,
+    stock: p.stock,
+    rating: p.rating,
+     images: {
+      image_one: p.productImages?.photosOne || null,
+      image_two: p.productImages?.photosTwo || null,
+      image_three: p.productImages?.photosThree || null,
+      image_four: p.productImages?.photosFour || null
+    },
+    size: [...new Set(p.sizeProducts.map(sp => sp.size.name))],
+    variant: [...new Set(p.variantProducts.map(vp => vp.variant.name))]
+  }));
+
+  return result;
 }
+
+
 
 export async function CreateProduct({ name, description, rating, priceOriginal, stock, image, size, variant, category }) {
   return prisma.$transaction(async (tx) => {
@@ -78,3 +132,97 @@ export async function CreateProduct({ name, description, rating, priceOriginal, 
     return product;
   });
 }
+
+export async function updateProduct({ id, name, description, rating, priceOriginal, stock, image, size, variant, category }) {
+  return prisma.$transaction(async (tx) => {
+    // --- Update product ---
+    const dataToUpdate = {};
+    if (name !== undefined) dataToUpdate.name = name;
+    if (description !== undefined) dataToUpdate.description = description;
+    if (rating !== undefined) dataToUpdate.rating = parseFloat(rating);
+    if (priceOriginal !== undefined) dataToUpdate.priceOriginal = parseFloat(priceOriginal);
+    if (stock !== undefined) dataToUpdate.stock = parseInt(stock);
+    if (image?.imageId !== undefined) dataToUpdate.id_product_images = image.imageId;
+
+    const updatedProduct = await tx.product.update({
+      where: { id },
+      data: dataToUpdate,
+    });
+
+    // --- Update Product Images ---
+    if (image) {
+      const imageData = {};
+      if (image.image_oneStr) imageData.photosOne = image.image_oneStr;
+      if (image.image_twoStr) imageData.photosTwo = image.image_twoStr;
+      if (image.image_threeStr) imageData.photosThree = image.image_threeStr;
+      if (image.image_fourStr) imageData.photosFour = image.image_fourStr;
+
+      if (Object.keys(imageData).length > 0) {
+        await tx.productImages.update({
+          where: { id: updatedProduct.id_product_images },
+          data: imageData,
+        });
+      }
+    }
+
+    // --- Update Sizes ---
+    const sizeArray = normalizeInput(size);
+    if (sizeArray.length > 0) {
+      await tx.sizeProduct.deleteMany({ where: { id_product: id } });
+
+    const sizeData = sizeArray.map((id_size) => ({
+      id_product: id,
+      id_size: parseInt(id_size),
+    }));
+
+    await tx.sizeProduct.createMany({ data: sizeData });
+    }
+
+    // --- Update Variants ---
+    const variantArray = normalizeInput(variant);
+      if (variantArray.length > 0) {
+        await tx.variantProduct.deleteMany({ where: { id_product: id } });
+
+        const variantData = variantArray.map((id_variant) => ({
+          id_product: id,
+          id_variant: parseInt(id_variant),
+        }));
+        await tx.variantProduct.createMany({ data: variantData });
+    }
+      
+    // --- Update Categories ---
+    const categoryArray = normalizeInput(category);
+    if (categoryArray.length > 0) {
+      await tx.productCategories.deleteMany({ where: { id_product: id } });
+
+      const categoryData = categoryArray.map((id_categories) => ({
+        id_product: id,
+        id_categories: parseInt(id_categories),
+      }));
+      await tx.productCategories.createMany({ data: categoryData });
+    }
+    
+
+    return updatedProduct;
+  });
+}
+
+  export async function DeleteProduct(id) {
+    try {
+    const result = await prisma.product.updateMany({
+      where: { id },
+      data: { isDeleted: true }
+    });
+      
+      if (result === 0) {
+        const err = new Error(`Product with id ${id} not found`);
+        err.code = "NOT_FOUND";
+        throw err;
+      }
+
+    return { id };
+  } catch (err) {
+    console.error("Failed to delete product:", err);
+    throw err;
+  }
+  }
