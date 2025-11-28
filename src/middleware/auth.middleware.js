@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { decode } from "jsonwebtoken";
 
 /**
  * 
@@ -19,7 +19,13 @@ if(!bearer.startsWith(prefix)) {
 const token = bearer.substring(prefix.length);
 try {
 const payload = jwt.verify(token, process.env.JWT_SECRET)
-req.jwtPayload = payload;
+
+    req.user = {
+      id: decode.id,
+      role: decode.role,
+      ...payload, 
+    };
+
 next()
 } catch (error) {
     res.status(401).json({
