@@ -152,3 +152,23 @@ export async function updateProduct({ id, name, description, rating, priceOrigin
     return updatedProduct;
   });
 }
+
+  export async function DeleteProduct(id) {
+    try {
+    const result = await prisma.product.updateMany({
+      where: { id },
+      data: { isDeleted: true }
+    });
+      
+      if (result === 0) {
+        const err = new Error(`Product with id ${id} not found`);
+        err.code = "NOT_FOUND";
+        throw err;
+      }
+
+    return { id };
+  } catch (err) {
+    console.error("Failed to delete product:", err);
+    throw err;
+  }
+  }

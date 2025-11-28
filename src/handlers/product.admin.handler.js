@@ -1,4 +1,4 @@
-import { CreateProduct, getAllProducts, updateProduct } from "../models/product.admin.models.js";
+import { CreateProduct, DeleteProduct, getAllProducts, updateProduct } from "../models/product.admin.models.js";
 import { normalizeInput } from "../pkg/utils/common.js";
 import { getPrisma } from '../pkg/libs/prisma.js';
 import path from 'path'
@@ -125,9 +125,8 @@ export async function CreateProductHandler(req, res) {
 
 export async function updateProductHandler(req, res) {
   try {
-    // File upload → ambil nama file saja
     const image = {
-      imageId: req.body.imageId, // kalau mau ganti image, bisa ambil id dari body
+      imageId: req.body.imageId,
       image_oneStr: req.files.image_one?.[0]?.filename,
       image_twoStr: req.files.image_two?.[0]?.filename,
       image_threeStr: req.files.image_three?.[0]?.filename,
@@ -198,3 +197,29 @@ export async function updateProductHandler(req, res) {
     });
   }
 }
+
+export async function DeleteProductHandler(req, res) {
+  try {
+    const id = Number(req.params.id);
+
+    const result = await DeleteProduct(id);
+
+    return res.json({
+      success: true,
+      message: `Product id ${id} successfully deleted`,
+      results: result
+    });
+  } catch (err) {
+    if (err.code === "NOT_FOUND") {
+      return res.status(404).json({ 
+        success: false,
+        message: err.message 
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+       error: "Internal server error" 
+      });
+  }
+};
