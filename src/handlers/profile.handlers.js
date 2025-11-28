@@ -1,6 +1,6 @@
-import { UpdateProfile } from "../models/profile.models.js";
+import { GetProfile, UpdateProfile } from "../models/profile.models.js";
 
-export const updateProfileHandler = async (req, res) => {
+export async function updateProfileHandler (req, res) {
   try {
     // --- CHECKING ID IN CONTEXT ---
     const userId = req.user?.id;
@@ -35,7 +35,7 @@ export const updateProfileHandler = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "Update Profile Successfully",
-      result: updated
+      results: updated
     });
 
   } catch (err) {
@@ -47,3 +47,46 @@ export const updateProfileHandler = async (req, res) => {
     });
   }
 };
+
+export async function GetProfileHandler (req, res) {
+  try {
+
+    const userId = req.user?.id
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: user not logged in",
+      });
+    }
+
+    const profile = await GetProfile(userId);
+    if (!profile) {
+      return res.status(404).json({
+        success: false,
+        message: "Profile not found",
+      });
+    }
+
+     return res.status(200).json({
+      success: true,
+      message: "Success get profile",
+      results: {
+        id: profile.id,
+        fullname: profile.fullname ?? "-",
+        phone: profile.phoneNumber ?? "-",
+        address: profile.address ?? "-",
+        photos: profile.photos ?? "-",
+        email: profile.user.email ?? "-",
+        createdAt: profile.createdAt,
+      },
+    });
+
+  } catch (error) {
+    console.log("get profile error:", error)
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get profile",
+      error: err.message,
+    })
+  }
+}
