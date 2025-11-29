@@ -1,0 +1,37 @@
+import { CreateCart } from "../models/orders.models.js";
+
+export async function CreateCartHandler(req, res) {
+  try {
+    const accountID = req.user?.id;
+    if (!accountID) {
+      return res.status(401).json({
+        success: false, 
+        message: "Unauthorized: user not logged in",
+    });
+    }
+
+    const cartItem = await CreateCart(accountID, req.body);
+    return res.status(201).json({
+      success: true,
+      message:"Create cart succesfully",
+      results: cartItem
+    });
+
+  } catch (error) {
+  console.log("CreateCart Error:", error);
+  // --- ERROR BUSINES LOGIC ---
+  if (error.message.includes("Product not found") || 
+      error.message.includes("Product is out of stock") || 
+      error.message.includes("Insufficient stock")) {
+    return res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+  return res.status(500).json({
+    success: false,
+    message: "Internal Server Error",
+    error: error.message
+  });
+  }
+}
