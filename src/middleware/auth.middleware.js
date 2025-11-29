@@ -36,7 +36,7 @@ next()
 }
 
 export function adminMiddleware(req, res, next) {
-    const userRole = req.jwtPayload?.role;
+    const userRole = req.user?.role;
 
     if (userRole !== 'admin') {
         return res.status(403).json({
