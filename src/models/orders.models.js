@@ -45,3 +45,43 @@ export async function CreateCart(accountID, input) {
 
   return cartItem;
 }
+
+export async function GetCart(userID) {
+  const carts = await prisma.cart.findMany({
+    where: { account_id: userID },
+    select: {
+      id: true,
+      quantity: true,
+      size: { select: { name: true } },
+      variant: { select: { name: true } },
+      product: {
+        select: {
+          id: true,
+          name: true,
+          priceOriginal: true,
+          priceDiscount: true,
+          flashSale: true,
+          productImages: {
+            select: {
+              photosOne: true
+            }
+          }
+        }
+      }
+    }
+  });
+
+  return carts.map(c => ({
+    id: c.id,
+    id_product: c.product.id,
+    name: c.product.name,
+    price: c.product.priceOriginal,
+    discount: c.product.priceDiscount,
+    flash_sale: c.product.flashSale,
+    images: c.product.productImages?.photosOne || "",
+    qty: c.quantity,
+    size: c.size?.name || null,
+    variant: c.variant?.name || null,
+    subtotal: (c.product.priceOriginal * c.quantity)
+  }));
+}
