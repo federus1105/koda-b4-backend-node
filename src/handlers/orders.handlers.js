@@ -1,4 +1,4 @@
-import { CreateCart, GetCart } from "../models/orders.models.js";
+import { CreateCart, GetCart, Orders } from "../models/orders.models.js";
 
 export async function CreateCartHandler(req, res) {
   try {
@@ -62,4 +62,40 @@ export async function GetCartHandler(req, res) {
       error: error.message
     });
   }
+}
+
+
+export async function OrdersHandler(req, res) {
+  try {
+
+      const userID = req.user?.id;
+      if (!userID) return res.status(401).json({ 
+        success: false, 
+        message: "Unauthorized: user not logged in",
+      });
+  
+      const input = req.body;
+      const orders = await Orders(input, userID);
+      return res.status(201).json({
+        success: true,
+        message: "Order created successfully",
+        results: orders
+      });
+
+    } catch (error) {
+    console.error("orders Error:", error);
+    if (error.errors) {
+      return res.status(400).json({
+        success: false,
+        errors: error.errors
+      });
+    }
+
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        error: error.message
+      });
+    }
+    
 }
