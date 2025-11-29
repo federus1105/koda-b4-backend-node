@@ -2,6 +2,7 @@ import { CreateProduct, DeleteProduct, getAllProducts, updateProduct } from "../
 import { normalizeInput } from "../pkg/utils/common.js";
 import { getPrisma } from '../pkg/libs/prisma.js';
 import path from 'path'
+import redisClient from "../pkg/libs/redis.js";
 const prisma = getPrisma();
 
 
@@ -24,6 +25,13 @@ export async function ListProducts(req, res) {
     const limit = 10;
     const skip = (page - 1) * limit;
 
+    // --- GET CACHE ---
+    const cacheKey = `list-product:${page}:${name}`;
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      return res.json(JSON.parse(cachedData));
+    }
+
 
     // --- GET DATA ---
     const products = await getAllProducts({ name, skip, take: limit });
@@ -37,10 +45,7 @@ export async function ListProducts(req, res) {
       });
     }
 
-    // --- TOTAL PAGES ---
     const totalPages = Math.ceil(total / limit);
-
-    // --- BASE URL ---
     const baseURL = "/admin/product";
     const queryPrefix = name ? `?name=${encodeURIComponent(name)}` : "?";
 
@@ -50,7 +55,6 @@ export async function ListProducts(req, res) {
       const sep = name ? "&" : "?";
       prevURL = `${baseURL}${queryPrefix}${sep}page=${page - 1}`;
     }
-
     // --- NEXT URL ---
     let nextURL = null;
     if (page < totalPages) {
@@ -58,7 +62,11 @@ export async function ListProducts(req, res) {
       nextURL = `${baseURL}${queryPrefix}${sep}page=${page + 1}`;
     }
 
-    return res.status(200).json({
+    await redisClient.set(cacheKey, JSON.stringify(products), {
+      EX: 60 * 5,
+    });
+    
+   const result = {
       success: true,
       page,
       limit,
@@ -68,8 +76,15 @@ export async function ListProducts(req, res) {
       nextURL,
       message: "Get list data successfully",
       results: products,
+    };
+    
+    // --- SET CACHE ---
+    await redisClient.set(cacheKey, JSON.stringify(result), {
+      EX: 60 * 10,
     });
 
+    return res.status(200).json(result);
+    
   } catch (error) {
     return res.status(500).json({
       success: false,
