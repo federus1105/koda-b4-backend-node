@@ -138,3 +138,74 @@ if (Array.isArray(categoryIDs) && categoryIDs.length > 0) {
   }));
 
 }
+
+export async function DetailProduct(productId) {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      priceOriginal: true,
+      priceDiscount: true,
+      stock: true,
+      rating: true,
+      flashSale: true,
+      productImages: {
+        select: {
+          photosOne: true,
+          photosTwo: true,
+          photosThree: true,
+          photosFour: true
+        }
+      },
+      sizeProducts: {
+        select: {
+          size: { select: { id: true, name: true } }
+        }
+      },
+      variantProducts: {
+        select: {
+          variant: { select: { id: true, name: true } }
+        }
+      }
+    }
+  });
+
+  if (!product) return null;
+
+  // --- IMAGE ---
+  const images = [
+    product.productImages?.photosOne || "",
+    product.productImages?.photosTwo || "",
+    product.productImages?.photosThree || "",
+    product.productImages?.photosFour || ""
+  ];
+
+  // --- SIZE ---
+  const size = product.sizeProducts.map(sp => ({
+    id: sp.size.id,
+    name: sp.size.name
+  }));
+
+  // --- VARIANT ---
+  const variant = product.variantProducts.map(vp => ({
+    id: vp.variant.id,
+    name: vp.variant.name
+  }));
+
+  return {
+    id: product.id,
+    name: product.name,
+    description: product.description,
+    price: product.priceOriginal,
+    priceDiscount: product.priceDiscount,
+    stock: product.stock,
+    rating: product.rating,
+    flash_sale: product.flashSale,
+    images,
+    size,
+    variant
+  };
+
+}

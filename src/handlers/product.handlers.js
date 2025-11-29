@@ -1,4 +1,4 @@
-import { FavoriteProduct, FilterProduct } from "../models/product.models.js";
+import { DetailProduct, FavoriteProduct, FilterProduct } from "../models/product.models.js";
 import redisClient from "../pkg/libs/redis.js";
 
 export async function FavoriteProductsHandler (req, res) {
@@ -139,6 +139,40 @@ export async function FilterProductHandler(req, res) {
       success: false,
       message: "Internal Server Error",
       error: error.message,
+    });
+  }
+}
+
+export async function DetailProductHandler(req, res) {
+
+  try {
+    const productId = Number(req.params.id);
+    if (isNaN(productId)) {
+      return res.status(400).json({
+        success: false, 
+        message: "Invalid product ID" 
+      });
+    }
+
+    const product = await DetailProduct(productId);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found" 
+      });
+    }
+
+    return res.json({
+       success: true, 
+       message: "Get detail product successfully",
+       results: product
+    });
+  } catch (error) {
+    console.error("Get Product Detail Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message
     });
   }
 }
