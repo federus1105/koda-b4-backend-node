@@ -1,4 +1,4 @@
-import { ListUser } from "../models/user.admin.models.js";
+import { CreateUser, ListUser } from "../models/user.admin.models.js";
 
 export async function ListUserHandler(req, res) {
   try {
@@ -54,6 +54,34 @@ export async function ListUserHandler(req, res) {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
+    });
+  }
+}
+
+export async function  CreateUserHandler(req, res) {
+  try {
+    const { email, password, role, fullname, phone, address, photos } = req.body;
+
+    const newUser = await CreateUser({
+      email,
+      password,
+      role,
+      fullname,
+      phone,
+      address,
+      photos : req.file ? req.file.filename : null,
+    });
+    return res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      result: newUser,
+    });
+
+  } catch (error) {
+    console.error("Create User Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to create user",
     });
   }
 }
