@@ -96,3 +96,59 @@ export async function CreateUser({ email, password, role, fullname, phone, addre
      };
    }); 
 }
+
+
+export async function UpdateUser(id, data) {
+  return await prisma.$transaction(async (tx) => {
+    const updateAccount = {};
+    const updateUser = {};
+
+    // --- ACCOUNT TABLE ---
+    if (data.fullname !== undefined) updateAccount.fullname = data.fullname;
+    if (data.phone !== undefined) updateAccount.phoneNumber = data.phone;
+    if (data.address !== undefined) updateAccount.address = data.address;
+    if (data.photos !== undefined) updateAccount.photos = data.photos;
+
+    // --- USERS TABLE ---
+    if (data.email !== undefined) updateUser.email = data.email;
+    if (data.role !== undefined) updateUser.role = data.role;
+
+    if (data.password !== undefined) {
+      updateUser.password = await hashPassword(data.password);
+    }
+
+    // --- UPDATE ACCOUNT IF ANY FIELD SENT ---
+    if (Object.keys(updateAccount).length > 0) {
+      await tx.account.updateMany({
+        where: { id_users: id },
+        data: updateAccount,
+      });
+    }
+
+    // --- UPDATE USERS IF ANY FIELD SENT ---
+    if (Object.keys(updateUser).length > 0) {
+      await tx.users.update({
+        where: { id },
+        data: updateUser,
+      });
+    }
+
+    // --- RETURN UPDATED DATA ---
+    return await tx.account.findFirst({
+      where: { id_users: id },
+      select: {
+        id_users: true,
+        fullname: true,
+        phoneNumber: true,
+        address: true,
+        photos: true,
+        user: {
+          select: {
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+  });
+}

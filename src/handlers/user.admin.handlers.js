@@ -1,4 +1,4 @@
-import { CreateUser, ListUser } from "../models/user.admin.models.js";
+import { CreateUser, ListUser, UpdateUser } from "../models/user.admin.models.js";
 
 export async function ListUserHandler(req, res) {
   try {
@@ -82,6 +82,50 @@ export async function  CreateUserHandler(req, res) {
     return res.status(500).json({
       success: false,
       message: "Failed to create user",
+    });
+  }
+}
+
+export async function UpdateUserHandler(req, res) {
+  try {
+    const id = parseInt(req.params.id);
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+
+    const { fullname, phone, address, email, role, password } = req.body;
+
+    const inputData = {
+      fullname,
+      phone,
+      address,
+      email,
+      role,
+      password,
+      photos : req.file ? req.file.filename : undefined,
+    };
+
+    // --- Remove undefined fields ---
+    Object.keys(inputData).forEach((key) => {
+      if (inputData[key] === undefined) delete inputData[key];
+    });
+
+    const updated = await UpdateUser(id, inputData);
+
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      result: updated,
+    });
+
+  } catch (error) {
+    console.error("Update User Error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update user",
     });
   }
 }
