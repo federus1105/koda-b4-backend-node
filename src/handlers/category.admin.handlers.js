@@ -1,4 +1,4 @@
-import { ListCategory } from '../models/category.admin.models.js';
+import { CreateCategory, ListCategory } from '../models/category.admin.models.js';
 import { getPrisma } from '../pkg/libs/prisma.js';
 const prisma = getPrisma();
 
@@ -59,4 +59,27 @@ export async function ListCategoryHandler(req, res) {
       error: error.message,
     });
   }
+}
+
+export async function CreateCategoryHandler(req, res) {
+  try {
+      const { name } = req.body;
+      
+      // --- CREATE DATA ---
+      const result = await CreateCategory({ name });
+      return res.status(201).json({
+        success: true,
+        message: "Category created successfully",
+        results: result,
+      });
+  
+    } catch (error) {
+      console.log("create category error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      });
+    }
+  
 }

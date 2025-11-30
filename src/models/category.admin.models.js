@@ -34,3 +34,18 @@ export async function ListCategory({  name, skip = 0, take = 10, countOnly = fal
 
     return categories;
 }
+
+export async function CreateCategory(input) {
+     const newCategory = await prisma.categories.create({
+       data: {
+         name: input.name,
+       },
+       select: {
+         id: true,
+         name: true,
+         createdAt: true,
+       },
+     });
+ 
+     return newCategory;
+}
