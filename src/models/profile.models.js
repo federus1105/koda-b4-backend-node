@@ -69,3 +69,11 @@ export async function UpdateProfile(userId, input) {
   });
 }
 
+export async function GetProfile(userId) {
+  return prisma.account.findFirst({
+    where: {id_users: userId},
+    include:{
+      user: true
+    }
+  }) 
+}

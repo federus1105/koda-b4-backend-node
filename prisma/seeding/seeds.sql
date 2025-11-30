@@ -1,4 +1,4 @@
--- Active: 1764253059915@@127.0.0.1@3306
+-- Active: 1762144751573@@127.0.0.1@5432@express
 
 --- INSERT CATEGORY ----
 INSERT INTO categories (name)
@@ -33,7 +33,7 @@ INSERT INTO delivery (name, fee) VALUES ('dine_in', 0), ('door_delivery', 15000)
  
 
 ---  INSERT PRODUCT IMAGES  ---
-INSERT INTO product_images (photosone) VALUES 
+INSERT INTO product_images ("photosOne") VALUES 
 ('https://domf5oio6qrcr.cloudfront.net/medialibrary/8468/Tea.jpg'),
 ('https://dcostseafood.id/wp-content/uploads/2021/12/ICED-GREEN-TEA.jpg'),
 ('https://shwetainthekitchen.com/wp-content/uploads/2023/07/lemon-iced-tea.jpg'),
@@ -91,7 +91,7 @@ INSERT INTO product_images (photosone) VALUES
 
 
 INSERT INTO products
-(name, id_product_images, description, rating, priceOriginal, stock) 
+(name, id_product_images, description, rating, "priceOriginal", stock) 
 VALUES
 ('tea', 1, 'Teh hitam klasik dengan aroma lembut dan rasa yang menenangkan, cocok untuk dinikmati hangat maupun dingin.', 7.5, 10000, 200),
 ('Green Tea', 2, 'Teh hijau segar dengan rasa alami yang khas dan kaya antioksidan, memberikan sensasi sehat di setiap tegukan.', 7.5, 12000, 200),
