@@ -235,6 +235,10 @@ SMTP_USER=<your_email>
 SMTP_PASS=<your_app_password_email>
 SMTP_FROM=<aplication-name> <your_email> # from
 FRONTEND_URL=<your_frontend_url>
+
+# CORS
+CORS_ORIGIN_1=<url_frontend1>
+CORS_ORIGIN_2=<url_frontent2>
 ```
 
 ## 📦 How to Install & Run Project
