@@ -1,6 +1,13 @@
 import { DetailProduct, FavoriteProduct, FilterProduct } from "../models/product.models.js";
 import redisClient from "../pkg/libs/redis.js";
 
+/**
+ * GET /product/favorite-product
+ * @summary List Favorite products with  pagination
+ * @tags Product
+ * @param {number} page.query - Page number for pagination (default 1)
+ * @return {ProductResponse} 200 - success response
+ */
 export async function FavoriteProductsHandler (req, res) {
  try {
      // --- PAGINATION ---
@@ -55,6 +62,18 @@ export async function FavoriteProductsHandler (req, res) {
 }    
 }
 
+/**
+ * GET /product
+ * @summary Filter and list products with search, category, price range, and pagination
+ * @tags Product
+ * @param {string} name.query - Filter by product name (optional)
+ * @param {array<number>} category.query.required - Filter category
+ * @param {number} min_price.query - Minimum price filter (optional)
+ * @param {number} max_price.query - Maximum price filter (optional)
+ * @param {string} sort_by.query - Sorting field (name | priceOriginal) (default: name)
+ * @param {number} page.query - Page number for pagination (default: 1)
+ * @return {object} 200 - success response
+ */
 export async function FilterProductHandler(req, res) {
   try {
     const name = req.query.name || "";
@@ -143,6 +162,14 @@ export async function FilterProductHandler(req, res) {
   }
 }
 
+/**
+ * GET /product/{id}
+ * @summary Detail product
+ * @tags Product
+ * @param {number} id.path.required - ID product
+ * @return {object} 200 - success response
+ * @security bearerAuth
+ */
 export async function DetailProductHandler(req, res) {
 
   try {
