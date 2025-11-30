@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --watch index.js",
     "build": "npx prisma generate",
+    "vercel-build": "npx prisma generate && echo Build complete",
     "migrate:create": "prisma migrate dev --name",
     "migrate:run": "prisma migrate dev",
     "migrate:reset": "prisma migrate reset",
