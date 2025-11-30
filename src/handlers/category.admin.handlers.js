@@ -1,7 +1,14 @@
 import { CreateCategory, ListCategory, UpdateCategory } from '../models/category.admin.models.js';
-import { getPrisma } from '../pkg/libs/prisma.js';
-const prisma = getPrisma();
 
+/**
+ * GET /admin/categories
+ * @summary List category with optional search and pagination
+ * @tags Categories
+ * @param {string} name.query - Optional product name to search
+ * @param {number} page.query - Page number for pagination (default 1)
+ * @return {object} 200 - success response
+ * @security bearerAuth
+ */
 export async function ListCategoryHandler(req, res) {
   try {
     // --- FILTER AND PAGINATION ---
@@ -61,6 +68,14 @@ export async function ListCategoryHandler(req, res) {
   }
 }
 
+/**
+* POST /admin/categories
+* @summary Update category data
+* @tags Categories
+* @param {CategoryInput} request.body.required - Category data to update
+* @return {object} 200 - Category updated successfully
+* @security bearerAuth
+*/
 export async function CreateCategoryHandler(req, res) {
   try {
       const { name } = req.body;
@@ -84,6 +99,15 @@ export async function CreateCategoryHandler(req, res) {
   
 }
 
+/**
+* PUT /admin/categories/{id}
+* @summary Update category data
+* @tags Categories
+* @param {number} id.path.required - Category ID
+* @param {CategoryInput} request.body.required - Category data to update
+* @return {object} 200 - Category updated successfully
+* @security bearerAuth
+*/
 export async function UpdateCategoryHandler(req, res) {
   try {
       const { id } = req.params;
