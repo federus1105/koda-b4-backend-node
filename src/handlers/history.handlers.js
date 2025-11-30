@@ -1,4 +1,4 @@
-import { History } from '../models/history.models.js';
+import { DetailHistory, History } from '../models/history.models.js';
 import { getPrisma } from '../pkg/libs/prisma.js';
 const prisma = getPrisma();
 
@@ -58,7 +58,7 @@ export async function HistoryHandler(req, res) {
     }
 
 
-    return res.json({
+    return res.status(200).json({
       success: true,
       message: "Get history successfully",
       page,
@@ -75,6 +75,42 @@ export async function HistoryHandler(req, res) {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch history",
+    });
+  }
+}
+
+
+export async function DetailHistoryHandler(req, res) {
+
+  try {
+    const userID = req.user?.id;
+    if (!userID) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: user not logged in",
+      });
+    }
+
+    const historyID = Number(req.params.id);
+    if (!historyID) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid history ID",
+      });
+    }
+
+    const detail = await DetailHistory(userID, historyID );
+    return res.status(200).json({
+      success: true,
+      message: "Get detail history successfully",
+      result: detail,
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch detail history",
     });
   }
 }

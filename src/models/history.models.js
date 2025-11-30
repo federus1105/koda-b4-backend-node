@@ -80,3 +80,86 @@ export async function History({
     throw new Error("Failed to fetch history");
     }
 }
+
+export async function DetailHistory(userID, historyID) {
+   try {
+      const order = await prisma.orders.findFirst({
+        where: {
+          id: historyID,
+          id_account: userID,
+        },
+        select: {
+          id: true,
+          order_number: true,
+          fullname: true,
+          phoneNumber: true,
+          email: true,
+          address: true,
+          total: true,
+          createdAt: true,
+  
+          paymentMethod: {
+            select: { name: true },
+          },
+          delivery: {
+            select: { name: true },
+          },
+          status: {
+            select: { name: true },
+          },
+  
+          // --- ITEMS ---
+          productOrders: {
+            select: {
+              quantity: true,
+              size: true,
+              variant: true,
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  flashSale: true,
+                  productImages: {
+                    select: {
+                      photosOne: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+  
+      if (!order) return null;
+      const items = order.productOrders.map((po) => ({
+        id: po.product.id,
+        image: po.product.productImages?.photosOne || null,
+        flash_sale: po.product.flashSale,
+        name: po.product.name,
+        quantity: po.quantity,
+        delivery: order.delivery?.name || null,
+        size: po.size,
+        variant: po.variant,
+      }));
+  
+      return {
+        id: order.id,
+        order_number: order.order_number,
+        fullname: order.fullname,
+        phone: order.phoneNumber,
+        email: order.email,
+        address: order.address,
+        payment: order.paymentMethod?.name || null,
+        delivery: order.delivery?.name || null,
+        status: order.status?.name || null,
+        total: order.total,
+        createdAt: order.createdAt,
+        items,
+      };
+  
+    } catch (error) {
+      console.error("Detail History error:", error);
+      throw new Error("Failed to fetch detail history");
+    }
+}
