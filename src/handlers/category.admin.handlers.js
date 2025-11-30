@@ -1,4 +1,4 @@
-import { CreateCategory, ListCategory } from '../models/category.admin.models.js';
+import { CreateCategory, ListCategory, UpdateCategory } from '../models/category.admin.models.js';
 import { getPrisma } from '../pkg/libs/prisma.js';
 const prisma = getPrisma();
 
@@ -82,4 +82,35 @@ export async function CreateCategoryHandler(req, res) {
       });
     }
   
+}
+
+export async function UpdateCategoryHandler(req, res) {
+  try {
+      const { id } = req.params;
+      const { name } = req.body;
+  
+      // --- VALIDATION ---
+      if (!id || isNaN(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid category ID",
+        });
+      }
+  
+      // --- UPDATE DATA ---
+      const result = await UpdateCategory(id, { name });
+      return res.status(200).json({
+        success: true,
+        message: "Category updated successfully",
+        result: result,
+      });
+  
+    } catch (error) {
+      console.log("update category error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      });
+    }
 }
