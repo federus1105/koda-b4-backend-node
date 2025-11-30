@@ -1,0 +1,140 @@
+import { CreateCategory, ListCategory, UpdateCategory } from '../models/category.admin.models.js';
+
+/**
+ * GET /admin/categories
+ * @summary List category with optional search and pagination
+ * @tags Categories
+ * @param {string} name.query - Optional product name to search
+ * @param {number} page.query - Page number for pagination (default 1)
+ * @return {object} 200 - success response
+ * @security bearerAuth
+ */
+export async function ListCategoryHandler(req, res) {
+  try {
+    // --- FILTER AND PAGINATION ---
+    const name = req.query.name || '' ;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const skip = (page - 1) * limit;
+
+    // --- GET DATA ---
+    const categories = await ListCategory({ name, skip, take: limit });
+    const total = await ListCategory({ name, countOnly: true });
+
+    
+    if (categories.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "categories not found",
+        results: []
+      });
+    }
+
+    const totalPages = Math.ceil(total / limit);
+    const baseURL = "/admin/categories";
+    const queryPrefix = name ? `?name=${encodeURIComponent(name)}` : "?";
+     // --- PREV URL ---
+    let prevURL = null;
+    if (page > 1) {
+      const sep = name ? "&" : "?";
+      prevURL = `${baseURL}${queryPrefix}${sep}page=${page - 1}`;
+    }
+    // --- NEXT URL ---
+    let nextURL = null;
+    if (page < totalPages) {
+      const sep = name ? "&" : "?";
+      nextURL = `${baseURL}${queryPrefix}${sep}page=${page + 1}`;
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Get list categories successfully",
+      page,
+      limit,
+      total,
+      totalPages,
+      prevURL,
+      nextURL,
+      results: categories,
+    });
+
+  } catch (error) {
+    console.log("list categories error : ", error)
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+}
+
+/**
+* POST /admin/categories
+* @summary Update category data
+* @tags Categories
+* @param {CategoryInput} request.body.required - Category data to update
+* @return {object} 200 - Category updated successfully
+* @security bearerAuth
+*/
+export async function CreateCategoryHandler(req, res) {
+  try {
+      const { name } = req.body;
+      
+      // --- CREATE DATA ---
+      const result = await CreateCategory({ name });
+      return res.status(201).json({
+        success: true,
+        message: "Category created successfully",
+        results: result,
+      });
+  
+    } catch (error) {
+      console.log("create category error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      });
+    }
+  
+}
+
+/**
+* PUT /admin/categories/{id}
+* @summary Update category data
+* @tags Categories
+* @param {number} id.path.required - Category ID
+* @param {CategoryInput} request.body.required - Category data to update
+* @return {object} 200 - Category updated successfully
+* @security bearerAuth
+*/
+export async function UpdateCategoryHandler(req, res) {
+  try {
+      const { id } = req.params;
+      const { name } = req.body;
+  
+      // --- VALIDATION ---
+      if (!id || isNaN(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid category ID",
+        });
+      }
+  
+      // --- UPDATE DATA ---
+      const result = await UpdateCategory(id, { name });
+      return res.status(200).json({
+        success: true,
+        message: "Category updated successfully",
+        result: result,
+      });
+  
+    } catch (error) {
+      console.log("update category error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      });
+    }
+}

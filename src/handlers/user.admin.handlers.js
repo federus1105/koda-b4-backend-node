@@ -1,5 +1,14 @@
 import { CreateUser, ListUser, UpdateUser } from "../models/user.admin.models.js";
 
+/**
+ * GET /admin/user
+ * @summary List users with optional search and pagination
+ * @tags Users
+ * @param {string} name.query - Optional users name to search
+ * @param {number} page.query - Page number for pagination (default 1)
+ * @return {object} 200 - success response
+ * @security bearerAuth
+ */
 export async function ListUserHandler(req, res) {
   try {
     // --- FILTER AND PAGINATION ---
@@ -58,6 +67,14 @@ export async function ListUserHandler(req, res) {
   }
 }
 
+/**
+ * POST /admin/user
+ * @summary Create a new user
+ * @tags Users
+ * @return {object} 201 - User created successfully
+ * @param {ProductInput} request.body.required - users info - multipart/form-data
+ * @security bearerAuth
+ */
 export async function  CreateUserHandler(req, res) {
   try {
     const { email, password, role, fullname, phone, address, photos } = req.body;
@@ -86,6 +103,15 @@ export async function  CreateUserHandler(req, res) {
   }
 }
 
+/**
+ * PATCH /admin/user/{id}
+ * @summary update data user
+ * @tags Users
+ * @param {number} id.path.required - User ID
+ * @param {UpdateUserInput} request.body - users info - multipart/form-data
+ * @return {object} 201 - User created successfully
+ * @security bearerAuth
+ */
 export async function UpdateUserHandler(req, res) {
   try {
     const id = parseInt(req.params.id);
@@ -104,7 +130,6 @@ export async function UpdateUserHandler(req, res) {
       address,
       email,
       role,
-      password,
       photos : req.file ? req.file.filename : undefined,
     };
 

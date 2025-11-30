@@ -7,12 +7,14 @@ import productRoutes from "./product.routes.js"
 import orderRoutes from "./order.routes.js"
 import historyRoutes from "./history.routes.js"
 import userRoutes from "./user.admin.routes.js"
+import categoriesRoutes from "./category.admin.routes.js"
 
 const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/admin/product', authMiddleware, adminMiddleware, productAdminRoutes);
 router.use('/admin/user', authMiddleware, adminMiddleware, userRoutes)
+router.use('/admin/categories', authMiddleware, adminMiddleware, categoriesRoutes)
 router.use('/profile', authMiddleware, profileRoutes);
 router.use('/product', productRoutes);
 router.use('/', authMiddleware, orderRoutes);
