@@ -69,8 +69,7 @@ export async function History({
       date: h.createdAt,
       status: h.status?.name || null,
       total: h.total,
-      image:
-        h.product_images?.[0]?.product?.product_images?.photos_one || null,
+      image: h.productOrders?.[0]?.product?.productImages?.photosOne || "",
     }));
 
     return formatted;
