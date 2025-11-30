@@ -1,5 +1,16 @@
 import { GetProfile, UpdateProfile } from "../models/profile.models.js";
 
+/**
+ * PATCH /profile
+ * @summary Update data profile
+ * @tags Profile
+ * @param {UpdateProfile} request.body - profile update info - multipart/form-data
+ * @return {object} 201 - Profile updated successfully
+ * @return {object} 401 - Unauthorized
+ * @return {object} 400 - bad request
+ * @return {object} 500 - Internal server error
+ * @security bearerAuth
+ */
 export async function updateProfileHandler (req, res) {
   try {
     // --- CHECKING ID IN CONTEXT ---
@@ -48,6 +59,13 @@ export async function updateProfileHandler (req, res) {
   }
 };
 
+/**
+ * GET /profile
+ * @summary Get data profile
+ * @tags Profile
+ * @return {object} 200 - success response
+ * @security bearerAuth
+ */
 export async function GetProfileHandler (req, res) {
   try {
 

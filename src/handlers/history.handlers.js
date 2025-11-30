@@ -2,6 +2,16 @@ import { DetailHistory, History } from '../models/history.models.js';
 import { getPrisma } from '../pkg/libs/prisma.js';
 const prisma = getPrisma();
 
+/**
+ * GET /history
+ * @summary List History with optional search and pagination
+ * @tags History
+ * @param {number} month.query - Optional month to search
+ * @param {number} status.query - Optional status to search
+ * @param {number} page.query - Page number for pagination (default 1)
+ * @return {object} 200 - success response
+ * @security bearerAuth
+ */
 export async function HistoryHandler(req, res) {
   try {
     const userID = req.user?.id;
@@ -79,7 +89,14 @@ export async function HistoryHandler(req, res) {
   }
 }
 
-
+/**
+ * GET /history/{id}
+ * @summary Detail History
+ * @tags History
+ * @param {number} id.path.required - ID Order
+ * @return {object} 200 - success response
+ * @security bearerAuth
+ */
 export async function DetailHistoryHandler(req, res) {
 
   try {

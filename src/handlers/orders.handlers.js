@@ -1,5 +1,16 @@
 import { CreateCart, GetCart, Orders } from "../models/orders.models.js";
 
+/**
+ * POST /cart
+ * @summary Create new cart item
+ * @tags Cart
+ * @param {CreateCart} request.body.required - Data input cart
+ * @return {object} 201 - Cart created successfully
+ * @return {object} 400 - Business logic error
+ * @return {object} 401 - Unauthorized
+ * @return {object} 500 - Internal server error
+ * @security bearerAuth
+ */
 export async function CreateCartHandler(req, res) {
   try {
     const accountID = req.user?.id;
@@ -37,6 +48,13 @@ export async function CreateCartHandler(req, res) {
 }
 
 
+/**
+ * GET /cart
+ * @summary List Cart
+ * @tags Cart
+ * @return {object} 200 - success response
+ * @security bearerAuth
+ */
 export async function GetCartHandler(req, res) {
   try {
     const userID = req.user?.id;
@@ -64,7 +82,17 @@ export async function GetCartHandler(req, res) {
   }
 }
 
-
+/**
+ * POST /transactions
+ * @summary Create your orders
+ * @tags Orders
+ * @param {Orders} request.body.required - Data input orders
+ * @return {object} 201 - Cart created successfully
+ * @return {object} 400 - Business logic error
+ * @return {object} 401 - Unauthorized
+ * @return {object} 500 - Internal server error
+ * @security bearerAuth
+ */
 export async function OrdersHandler(req, res) {
   try {
 
