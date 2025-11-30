@@ -31,3 +31,23 @@ export const loginValidation = [
         .notEmpty().withMessage("Password is required")
         .isLength({ min: 8 }).withMessage("Password must be at least 8 characters long"),
 ];
+
+
+export const ForgotPasswordValidator = [
+    body("email")
+     .notEmpty().withMessage("Email is required")
+     .isEmail().withMessage("Invalid email format"),
+]
+
+export const ResetPasswordValidator = [
+    body("token")
+     .notEmpty().withMessage("Token is required"),
+
+    body("new_password")
+        .notEmpty().withMessage("Password is required")
+        .isLength({ min: 8 }).withMessage("Password must be at least 8 characters long")
+        .matches(/[A-Z]/).withMessage("Password must contain at least one uppercase letter")
+        .matches(/[a-z]/).withMessage("Password must contain at least one lowercase letter")
+        .matches(/[0-9]/).withMessage("Password must contain at least one number")
+        .matches(/[\W_]/).withMessage("Password must contain at least one special character"),
+]

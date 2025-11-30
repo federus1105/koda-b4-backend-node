@@ -43,3 +43,16 @@
  * @property {object} results
  * @property {string} results.token
  */
+
+// ==== FORGOT PASSWORD ===
+/**
+ * @typedef {object} ForgotPassword
+ * @property {string} email.required
+ */
+
+// === RESET PASSWORD ===
+/**
+ * @typedef {object} ResetPassword
+ * @property {string} token.required
+ * @property {string} new_password.required
+ */

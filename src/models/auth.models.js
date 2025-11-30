@@ -1,5 +1,6 @@
 import { getPrisma } from '../pkg/libs/prisma.js';
 import { hashPassword, verifyPassword } from '../pkg/libs/hashPassword.js';
+import redisClient from '../pkg/libs/redis.js';
 const prisma = getPrisma();
 
 
@@ -60,4 +61,45 @@ export async function LoginUser(email, password) {
       role: user.role
   };
 
+}
+
+export async function GetUserByEmail(email) {
+  try {
+    const user = await prisma.users.findFirst({
+      where: { email },
+      select: {
+        id: true,
+        email: true,
+        password: true,
+      },
+    });
+
+    if (!user) {
+      return { 
+        success: false, 
+        message: "user not found" 
+      };
+    }
+
+    return { success: true, data: user };
+
+  } catch (error) {
+    return { 
+      success: false, 
+      message: "internal server error", 
+      error: error.message };
+  }
+}
+
+export async function SaveResetToken(key, userID, ttlSeconds) {
+  try {
+    await redisClient.set(key, userID, { EX: ttlSeconds });
+    return { success: true };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to save token",
+      error: error.message,
+    };
+  }
 }
