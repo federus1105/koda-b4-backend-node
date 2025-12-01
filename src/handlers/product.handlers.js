@@ -67,7 +67,7 @@ export async function FavoriteProductsHandler (req, res) {
  * @summary Filter and list products with search, category, price range, and pagination
  * @tags Product
  * @param {string} name.query - Filter by product name (optional)
- * @param {array<number>} category.query.required - Filter category
+ * @param {array<number>} category.query - Filter category
  * @param {number} min_price.query - Minimum price filter (optional)
  * @param {number} max_price.query - Maximum price filter (optional)
  * @param {string} sort_by.query - Sorting field (name | priceOriginal) (default: name)
